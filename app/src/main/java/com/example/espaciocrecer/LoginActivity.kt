@@ -1,5 +1,6 @@
 package com.example.espaciocrecer
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -33,14 +34,10 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        Toast.makeText(this@LoginActivity, "Layout cargado", Toast.LENGTH_SHORT).show()
-
         val repository = Repository()
 
         val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-
-
 
         toolbar = findViewById(R.id.toolbar_login)
         setSupportActionBar(toolbar)
@@ -69,7 +66,7 @@ class LoginActivity : AppCompatActivity() {
             if(email_form.isNotEmpty()){
                 if(password_form.isNotEmpty()){
                     val myForm = LoginForm(email_form, password_form)
-                    viewModel.login(myForm)
+                    Log.d("logModel", viewModel.login(myForm).toString())
                     viewModel.loginResponse.observe(this, { response ->
                         if(response.isSuccessful){
                             Log.d("Main", response.body().toString())
@@ -88,6 +85,9 @@ class LoginActivity : AppCompatActivity() {
                                 val fecha_nacimiento = jsonUser?.formacion ?: "null"
                                 val password = jsonUser?.password ?: "null"
                                 user = User(userId, id_users_rol, rut_usuario, nombre_usuario, apellido_pat_usuario, apellido_mat_usuario, sexo, telefono, email, formacion, fecha_nacimiento, password)
+                                val intent = Intent(this@LoginActivity, WelcomeActivity::class.java)
+                                intent.putExtra("userId", userId)
+                                startActivity(intent)
                             }else{
                                 Toast.makeText(this@LoginActivity, "Correo o contraseña son incorrectos.", Toast.LENGTH_SHORT).show()
                             }
