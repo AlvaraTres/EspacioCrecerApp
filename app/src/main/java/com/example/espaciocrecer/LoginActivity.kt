@@ -1,42 +1,46 @@
 package com.example.espaciocrecer
 
-import API.ApiService
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.UserHandle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
-import com.google.android.material.textfield.TextInputEditText
+import androidx.lifecycle.ViewModelProvider
+import com.example.espaciocrecer.model.LoginForm
+import com.example.espaciocrecer.model.User
+import com.example.espaciocrecer.repository.Repository
 import kotlinx.android.synthetic.main.activity_login.*
 import org.json.JSONObject
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.converter.scalars.ScalarsConverterFactory
-import java.net.PasswordAuthentication
+import kotlin.math.log
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var toolbar: Toolbar
 
-    private lateinit var retrofit: Retrofit
-    private lateinit var service: ApiService
-    private lateinit var user: User
+    private lateinit var viewModel: MainViewModel
+
     private var email_form: String = ""
     private var password_form: String = ""
+    public lateinit var user : User
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
-        service = createApiService()
+        Toast.makeText(this@LoginActivity, "Layout cargado", Toast.LENGTH_SHORT).show()
+
+        val repository = Repository()
+
+        val viewModelFactory = MainViewModelFactory(repository)
+        viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
+
+
 
         toolbar = findViewById(R.id.toolbar_login)
         setSupportActionBar(toolbar)
@@ -64,7 +68,34 @@ class LoginActivity : AppCompatActivity() {
             password_form = passwordInput.text.toString().trim()
             if(email_form.isNotEmpty()){
                 if(password_form.isNotEmpty()){
-                    executeLogin(email_form, password_form)
+                    val myForm = LoginForm(email_form, password_form)
+                    viewModel.login(myForm)
+                    viewModel.loginResponse.observe(this, { response ->
+                        if(response.isSuccessful){
+                            Log.d("Main", response.body().toString())
+                            val jsonUser = response.body()
+                            val userId = jsonUser?.id ?: 0
+                            if(userId != null || userId > 0){
+                                val id_users_rol = jsonUser?.id_users_rol ?: 0
+                                val rut_usuario = jsonUser?.rut_usuario ?: "null"
+                                val nombre_usuario = jsonUser?.nombre_usuario ?: "null"
+                                val apellido_pat_usuario = jsonUser?.apellido_pat_usuario ?: "null"
+                                val apellido_mat_usuario = jsonUser?.apellido_mat_usuario ?: "null"
+                                val sexo = jsonUser?.sexo ?: "null"
+                                val telefono = jsonUser?.telefono ?: "null"
+                                val email = jsonUser?.email ?: "null"
+                                val formacion = jsonUser?.formacion ?: "null"
+                                val fecha_nacimiento = jsonUser?.formacion ?: "null"
+                                val password = jsonUser?.password ?: "null"
+                                user = User(userId, id_users_rol, rut_usuario, nombre_usuario, apellido_pat_usuario, apellido_mat_usuario, sexo, telefono, email, formacion, fecha_nacimiento, password)
+                            }else{
+                                Toast.makeText(this@LoginActivity, "Correo o contraseña son incorrectos.", Toast.LENGTH_SHORT).show()
+                            }
+
+                        }else{
+                            Toast.makeText(this@LoginActivity, "Fallo en la conexión, favor comprueba tu conexión a internet", Toast.LENGTH_SHORT).show()
+                        }
+                    })
                 }else{
                     Toast.makeText(this@LoginActivity, "Contraseña vacia", Toast.LENGTH_SHORT).show()
                 }
@@ -74,31 +105,15 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun createApiService() : ApiService {
-        retrofit = Retrofit.Builder().baseUrl("http://faa0-190-46-212-90.ngrok.io/").addConverterFactory(
-            GsonConverterFactory.create()
-        ).build()
-
-        return retrofit.create(ApiService::class.java)
+    private fun createApiService() : Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("http://faa0-190-46-212-90.ngrok.io/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
     }
 
     private fun executeLogin(email: String, password: String){
-        val call = service.login(email, password)
-        call.enqueue(object : Callback<String> {
-            override fun onResponse(call: Call<String>, response: Response<String>){
-                if(response.isSuccessful && response.body() != null){
-                    try{
-                        Toast.makeText(this@LoginActivity, "Login Correcto", Toast.LENGTH_SHORT).show()
-                    }catch (e: Exception) {
-                        Log.d("login", e.toString())
-                        Toast.makeText(this@LoginActivity, response.body(), Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
 
-            override fun onFailure(call: Call<String>, t: Throwable) {
-                Log.d("login",t.toString())
-            }
-        })
     }
+
 }

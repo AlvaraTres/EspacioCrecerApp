@@ -1,4 +1,4 @@
-package com.example.espaciocrecer
+package com.example.espaciocrecer.model
 
 data class User(
     var id: Int,
