@@ -17,4 +17,9 @@ object RetrofitInstance {
     val api2: getLogedUserApi by lazy {
         retrofit.create(getLogedUserApi::class.java)
     }
+
+    val api3: ReservaApi by lazy {
+        retrofit.create(ReservaApi::class.java)
+    }
+
 }

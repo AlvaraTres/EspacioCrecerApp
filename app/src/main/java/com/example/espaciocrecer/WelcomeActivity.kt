@@ -20,12 +20,16 @@ class WelcomeActivity : AppCompatActivity() {
         val userId = getLoginIntent.getIntExtra("userId", 0)
 
         val repository = Repository()
-
-        val viewModelFactory = GetLogedUserModelFactory(repository)
+        val viewModelFactory = MainViewModelFactory(repository)
         viewModel = ViewModelProvider(this, viewModelFactory).get(MainViewModel::class.java)
-        viewModel.getLogedUser(getLogedUserForm(1))
-        viewModel.getLogedUserResponse.observe(this, Observer { response ->
-            Log.d("Response", response.body().toString())
+        viewModel.getUserReservas(userId)
+        viewModel.getUserReservasResponse.observe(this, Observer { response ->
+            if(response.isSuccessful){
+                Log.d("UserLoged", response.body().toString())
+            }else{
+                Log.d("Error",  "error en la comunicación")
+            }
+
         })
 
 

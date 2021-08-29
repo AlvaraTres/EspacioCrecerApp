@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.espaciocrecer.model.LoginForm
+import com.example.espaciocrecer.model.Reserva
 import com.example.espaciocrecer.model.User
 import com.example.espaciocrecer.model.getLogedUserForm
 import com.example.espaciocrecer.repository.Repository
@@ -16,6 +17,8 @@ class MainViewModel(private val repository: Repository): ViewModel() {
 
     var getLogedUserResponse: MutableLiveData<Response<User>> = MutableLiveData()
 
+    var getUserReservasResponse: MutableLiveData<Response<List<Reserva>>> = MutableLiveData()
+
     fun login(form: LoginForm) {
         viewModelScope.launch {
             val response = repository.login(form)
@@ -23,10 +26,17 @@ class MainViewModel(private val repository: Repository): ViewModel() {
         }
     }
 
-    fun getLogedUser(form: getLogedUserForm) {
+    fun getLogedUser(id: Int) {
         viewModelScope.launch {
-            val response = repository.getLogedUser(form)
+            val response = repository.getLogedUser(id)
             getLogedUserResponse.value = response
+        }
+    }
+
+    fun getUserReservas(id: Int) {
+        viewModelScope.launch {
+            val response = repository.getUserReservas(id)
+            getUserReservasResponse.value = response
         }
     }
 }

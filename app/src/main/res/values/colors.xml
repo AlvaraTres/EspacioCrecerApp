@@ -10,4 +10,6 @@
     <color name="colorDefault">#9e9e9e</color>
     <color name="colorDarkBlue">#00008b</color>
     <color name="colorwhiteblueshade">#DF949DCD</color>
+    <color name="colorEspacioCrecerNav">#059669</color>
+    <color name="colorEspacioCrecerNavPressed">#065F4F</color>
 </resources>
